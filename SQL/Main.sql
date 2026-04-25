@@ -1,3 +1,3 @@
 create database QuanLyBenhVien;
 use QuanLyBenhVien;
-CREATE TABLE 
+CREATE TABLE
