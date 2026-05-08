@@ -322,3 +322,180 @@ INSERT INTO HOADONVIENPHI (MAHOADON, MABN, NGAYLAP, TONGTIEN, TRANGTHAITHANHTOAN
 (1018, 'BN018', '2026-04-25 11:00:00', 920000.00, N'Đã thanh toán', N'Siêu âm tim và điện tâm đồ kiểm tra'),
 (1019, 'BN019', '2026-04-28 13:25:00', 500000.00, N'Đã thanh toán', N'Khám nhi khoa và tư vấn dinh dưỡng'),
 (1020, 'BN020', '2026-05-02 10:50:00', 8900000.00, N'Chưa thanh toán', N'Viện phí phát sinh điều trị lão khoa thực tế');
+
+USE QuanLyBenhVien;
+GO
+
+/* ========================================================================================= */
+/* 1. THÊM DỮ LIỆU BẢNG KHOA (Tạm thời để TRUONGKHOA = NULL để tránh lỗi tham chiếu vòng)    */
+/* ========================================================================================= */
+INSERT INTO KHOA (MAKHOA, TENKHOA, VITRI, SODIENTHOAI, TRUONGKHOA, NGAYTHANHLAP, EMAILKHOA, GHICHU) VALUES
+('K001', N'Khoa Khám Bệnh', N'Tầng 1 - Tòa nhà A', '0283111111', NULL, '2015-01-01', 'khambenh@bv.vn', N'Khoa tiếp nhận ban đầu'),
+('K002', N'Khoa Cấp Cứu', N'Tầng trệt - Tòa nhà A', '0283222222', NULL, '2015-01-01', 'capcuu@bv.vn', N'Trực 24/7'),
+('K003', N'Khoa Hồi Sức Tích Cực', N'Tầng 2 - Tòa nhà A', '0283333333', NULL, '2015-06-15', 'icu@bv.vn', N'Dành cho bệnh nhân nặng'),
+('K004', N'Khoa Nội Tổng Hợp', N'Tầng 3 - Tòa nhà B', '0283444444', NULL, '2016-02-10', 'noitonghop@bv.vn', N'Điều trị các bệnh nội khoa'),
+('K005', N'Khoa Ngoại Tổng Hợp', N'Tầng 4 - Tòa nhà B', '0283555555', NULL, '2016-02-10', 'ngoaitonghop@bv.vn', N'Phẫu thuật và thủ thuật'),
+('K006', N'Khoa Phụ Sản', N'Tầng 5 - Tòa nhà B', '0283666666', NULL, '2015-03-20', 'phusan@bv.vn', N'Chăm sóc mẹ và bé'),
+('K007', N'Khoa Nhi', N'Tầng 6 - Tòa nhà B', '0283777777', NULL, '2015-04-12', 'nhikhoa@bv.vn', N'Chăm sóc sức khỏe trẻ em'),
+('K008', N'Khoa Chấn Thương Chỉnh Hình', N'Tầng 2 - Tòa nhà C', '0283888888', NULL, '2017-08-05', 'chanthuong@bv.vn', N'Phẫu thuật xương khớp'),
+('K009', N'Khoa Tim Mạch', N'Tầng 3 - Tòa nhà C', '0283999999', NULL, '2016-11-20', 'timmach@bv.vn', N'Khám và can thiệp tim mạch'),
+('K010', N'Khoa Thần Kinh', N'Tầng 4 - Tòa nhà C', '0283101010', NULL, '2018-05-18', 'thankinh@bv.vn', N'Nội thần kinh'),
+('K011', N'Khoa Tai Mũi Họng', N'Tầng 1 - Tòa nhà D', '0283121212', NULL, '2015-09-09', 'taimuihong@bv.vn', N'Nội soi và phẫu thuật TMH'),
+('K012', N'Khoa Răng Hàm Mặt', N'Tầng 2 - Tòa nhà D', '0283131313', NULL, '2016-10-10', 'ranghammat@bv.vn', N'Nha khoa tổng quát'),
+('K013', N'Khoa Mắt', N'Tầng 3 - Tòa nhà D', '0283141414', NULL, '2017-12-12', 'nhankhoa@bv.vn', N'Khám và mổ mắt'),
+('K014', N'Khoa Da Liễu', N'Tầng 4 - Tòa nhà D', '0283151515', NULL, '2019-01-20', 'dalieu@bv.vn', N'Điều trị bệnh lý da'),
+('K015', N'Khoa Truyền Nhiễm', N'Tòa nhà E (Khu cách ly)', '0283161616', NULL, '2020-02-01', 'truyennhiem@bv.vn', N'Kiểm soát bệnh dịch'),
+('K016', N'Khoa Ung Bướu', N'Tầng 1 - Tòa nhà F', '0283171717', NULL, '2019-06-15', 'ungbuou@bv.vn', N'Xạ trị và hóa trị'),
+('K017', N'Khoa Chẩn Đoán Hình Ảnh', N'Tầng hầm - Tòa nhà A', '0283181818', NULL, '2015-01-01', 'cdha@bv.vn', N'X-Quang, MRI, Siêu âm'),
+('K018', N'Khoa Xét Nghiệm', N'Tầng 2 - Tòa nhà A', '0283191919', NULL, '2015-01-01', 'xetnghiem@bv.vn', N'Huyết học, Sinh hóa'),
+('K019', N'Khoa Dược', N'Tầng trệt - Tòa nhà C', '0283202020', NULL, '2015-01-01', 'khoaduoc@bv.vn', N'Quản lý và cấp phát thuốc'),
+('K020', N'Khoa Dinh Dưỡng', N'Tầng hầm - Tòa nhà B', '0283212121', NULL, '2018-09-05', 'dinhduong@bv.vn', N'Chăm sóc suất ăn bệnh lý');
+
+/* ========================================================================================= */
+/* 2. THÊM DỮ LIỆU BẢNG NHANVIEN                                                             */
+/* ========================================================================================= */
+INSERT INTO NHANVIEN (MANV, HOTEN, NGAYSINH, GIOITINH, DIACHI, SODT, MAKHOA, CHUCVU, EMAIL, NGAYVAOLAM, BANGCAP, CHUYENMON, TRANGTHAI) VALUES
+('NV001', N'Lê Minh Đạt', '1975-08-20', N'Nam', N'Quận 1, TP. HCM', '0901111111', 'K001', N'Trưởng Khoa', 'dat.le@bv.vn', '2015-02-01', N'Tiến sĩ', N'Nội Đa Khoa', N'Đang làm việc'),
+('NV002', N'Trần Thanh Sơn', '1980-12-05', N'Nam', N'Quận 3, TP. HCM', '0902222222', 'K002', N'Trưởng Khoa', 'son.tran@bv.vn', '2015-02-15', N'Thạc sĩ', N'Hồi sức cấp cứu', N'Đang làm việc'),
+('NV003', N'Phạm Thu Hà', '1982-03-10', N'Nữ', N'Quận 5, TP. HCM', '0903333333', 'K003', N'Trưởng Khoa', 'ha.pham@bv.vn', '2015-07-01', N'Tiến sĩ', N'Gây mê hồi sức', N'Đang làm việc'),
+('NV004', N'Nguyễn Hoàng Bách', '1978-11-22', N'Nam', N'Quận 10, TP. HCM', '0904444444', 'K004', N'Trưởng Khoa', 'bach.nguyen@bv.vn', '2016-03-01', N'Tiến sĩ', N'Nội Tổng Quát', N'Đang làm việc'),
+('NV005', N'Hoàng Vĩnh Khang', '1974-05-30', N'Nam', N'Tân Bình, TP. HCM', '0905555555', 'K005', N'Trưởng Khoa', 'khang.hoang@bv.vn', '2016-03-15', N'Tiến sĩ', N'Ngoại Tiêu Hóa', N'Đang làm việc'),
+('NV006', N'Đinh Mai Phương', '1985-09-15', N'Nữ', N'Gò Vấp, TP. HCM', '0906666666', 'K006', N'Trưởng Khoa', 'phuong.dinh@bv.vn', '2015-04-10', N'Thạc sĩ', N'Sản Phụ Khoa', N'Đang làm việc'),
+('NV007', N'Lương Quốc Trí', '1981-02-28', N'Nam', N'Phú Nhuận, TP. HCM', '0907777777', 'K007', N'Trưởng Khoa', 'tri.luong@bv.vn', '2015-05-01', N'Tiến sĩ', N'Nhi Khoa', N'Đang làm việc'),
+('NV008', N'Võ Đức Cường', '1979-07-14', N'Nam', N'Bình Thạnh, TP. HCM', '0908888888', 'K008', N'Trưởng Khoa', 'cuong.vo@bv.vn', '2017-09-01', N'BS Chuyên Khoa II', N'Cơ Xương Khớp', N'Đang làm việc'),
+('NV009', N'Tạ Đình Phong', '1976-10-09', N'Nam', N'Thủ Đức, TP. HCM', '0909999999', 'K009', N'Trưởng Khoa', 'phong.ta@bv.vn', '2016-12-01', N'Tiến sĩ', N'Nội Tim Mạch', N'Đang làm việc'),
+('NV010', N'Trương Mỹ Linh', '1983-12-25', N'Nữ', N'Quận 1, TP. HCM', '0910101010', 'K010', N'Trưởng Khoa', 'linh.truong@bv.vn', '2018-06-01', N'BS Chuyên Khoa II', N'Nội Thần Kinh', N'Đang làm việc'),
+('NV011', N'Châu Tấn Phát', '1988-04-18', N'Nam', N'Quận 7, TP. HCM', '0911112222', 'K011', N'Trưởng Khoa', 'phat.chau@bv.vn', '2015-10-01', N'Thạc sĩ', N'Tai Mũi Họng', N'Đang nghỉ phép'),
+('NV012', N'Lâm Hữu Nghĩa', '1984-01-20', N'Nam', N'Quận 8, TP. HCM', '0912223333', 'K012', N'Trưởng Khoa', 'nghia.lam@bv.vn', '2016-11-01', N'Tiến sĩ', N'Nha Khoa', N'Đang làm việc'),
+('NV013', N'Đặng Phương Nam', '1977-06-12', N'Nam', N'Quận 5, TP. HCM', '0913334444', 'K013', N'Trưởng Khoa', 'nam.dang@bv.vn', '2018-01-01', N'BS Chuyên Khoa II', N'Nhãn Khoa', N'Đang làm việc'),
+('NV014', N'Ngô Tố Uyên', '1989-08-08', N'Nữ', N'Tân Phú, TP. HCM', '0914445555', 'K014', N'Trưởng Khoa', 'uyen.ngo@bv.vn', '2019-02-01', N'Thạc sĩ', N'Da Liễu', N'Đang làm việc'),
+('NV015', N'Bùi Thanh Tuấn', '1980-03-24', N'Nam', N'Nhà Bè, TP. HCM', '0915556666', 'K015', N'Trưởng Khoa', 'tuan.bui@bv.vn', '2020-03-01', N'BS Chuyên Khoa II', N'Bệnh Nhiệt Đới', N'Đang làm việc'),
+('NV016', N'Phan Bích Thủy', '1975-11-30', N'Nữ', N'Quận 1, TP. HCM', '0916667777', 'K016', N'Trưởng Khoa', 'thuy.phan@bv.vn', '2019-07-01', N'Tiến sĩ', N'Ung Bướu', N'Đang làm việc'),
+('NV017', N'Kiều Quang Hiếu', '1982-05-05', N'Nam', N'Bình Tân, TP. HCM', '0917778888', 'K017', N'Trưởng Khoa', 'hieu.kieu@bv.vn', '2015-02-01', N'Thạc sĩ', N'CĐHA', N'Đang làm việc'),
+('NV018', N'Vũ Bích Ngọc', '1987-09-02', N'Nữ', N'Quận 4, TP. HCM', '0918889999', 'K018', N'Trưởng Khoa', 'ngoc.vu@bv.vn', '2015-02-01', N'Tiến sĩ', N'Sinh hóa lâm sàng', N'Đang làm việc'),
+('NV019', N'Đoàn Bảo Châu', '1986-12-12', N'Nữ', N'Quận 2, TP. HCM', '0919990000', 'K019', N'Trưởng Khoa', 'chau.doan@bv.vn', '2015-02-01', N'Dược sĩ CK II', N'Dược Lâm Sàng', N'Đang làm việc'),
+('NV020', N'Mạch Tấn Lộc', '1990-07-27', N'Nam', N'Quận 11, TP. HCM', '0920001111', 'K020', N'Trưởng Khoa', 'loc.mach@bv.vn', '2018-10-01', N'Thạc sĩ', N'Dinh dưỡng y khoa', N'Đang làm việc');
+
+/* ========================================================================================= */
+/* 3. CẬP NHẬT TRƯỞNG KHOA CHO BẢNG KHOA (Giải quyết khóa ngoại tham chiếu)                  */
+/* ========================================================================================= */
+UPDATE KHOA SET TRUONGKHOA = 'NV001' WHERE MAKHOA = 'K001';
+UPDATE KHOA SET TRUONGKHOA = 'NV002' WHERE MAKHOA = 'K002';
+UPDATE KHOA SET TRUONGKHOA = 'NV003' WHERE MAKHOA = 'K003';
+UPDATE KHOA SET TRUONGKHOA = 'NV004' WHERE MAKHOA = 'K004';
+UPDATE KHOA SET TRUONGKHOA = 'NV005' WHERE MAKHOA = 'K005';
+UPDATE KHOA SET TRUONGKHOA = 'NV006' WHERE MAKHOA = 'K006';
+UPDATE KHOA SET TRUONGKHOA = 'NV007' WHERE MAKHOA = 'K007';
+UPDATE KHOA SET TRUONGKHOA = 'NV008' WHERE MAKHOA = 'K008';
+UPDATE KHOA SET TRUONGKHOA = 'NV009' WHERE MAKHOA = 'K009';
+UPDATE KHOA SET TRUONGKHOA = 'NV010' WHERE MAKHOA = 'K010';
+UPDATE KHOA SET TRUONGKHOA = 'NV011' WHERE MAKHOA = 'K011';
+UPDATE KHOA SET TRUONGKHOA = 'NV012' WHERE MAKHOA = 'K012';
+UPDATE KHOA SET TRUONGKHOA = 'NV013' WHERE MAKHOA = 'K013';
+UPDATE KHOA SET TRUONGKHOA = 'NV014' WHERE MAKHOA = 'K014';
+UPDATE KHOA SET TRUONGKHOA = 'NV015' WHERE MAKHOA = 'K015';
+UPDATE KHOA SET TRUONGKHOA = 'NV016' WHERE MAKHOA = 'K016';
+UPDATE KHOA SET TRUONGKHOA = 'NV017' WHERE MAKHOA = 'K017';
+UPDATE KHOA SET TRUONGKHOA = 'NV018' WHERE MAKHOA = 'K018';
+UPDATE KHOA SET TRUONGKHOA = 'NV019' WHERE MAKHOA = 'K019';
+UPDATE KHOA SET TRUONGKHOA = 'NV020' WHERE MAKHOA = 'K020';
+
+/* ========================================================================================= */
+/* 4. THÊM DỮ LIỆU BẢNG PHONGBENH (MAPHONG tự động tăng)                                     */
+/* ========================================================================================= */
+INSERT INTO PHONGBENH (TENPHONG, MALOAIPHONG, MAKHOA, SUCCHUA, GIAPHONG, TRANGTHAI, SOGIUONGTRONG, GHICHU) VALUES
+(N'Phòng Khám 101', 'LP001', 'K001', 4, 150000.00, N'Sẵn sàng', 4, N'Khám hô hấp'),
+(N'Cấp Cứu A1', 'LP006', 'K002', 10, 250000.00, N'Đang sử dụng', 2, N'Khu vực đỏ'),
+(N'Hồi Sức Tích Cực 1', 'LP007', 'K003', 6, 1500000.00, N'Đang sử dụng', 1, N'Theo dõi monitor 24/7'),
+(N'Phòng Nội Tổng Hợp 301', 'LP002', 'K004', 2, 300000.00, N'Sẵn sàng', 2, N'Nam giới'),
+(N'Phòng Hậu Phẫu 402', 'LP009', 'K005', 4, 400000.00, N'Đang sử dụng', 1, N'Theo dõi sau mổ'),
+(N'Phòng Sanh 501', 'LP012', 'K006', 1, 1800000.00, N'Sẵn sàng', 1, N'Sanh dịch vụ gia đình'),
+(N'Phòng Nhi Đồng 601', 'LP003', 'K007', 1, 600000.00, N'Đang sử dụng', 0, N'Dành cho trẻ em dưới 5 tuổi'),
+(N'Phòng VIP Chấn Thương', 'LP004', 'K008', 1, 1200000.00, N'Sẵn sàng', 1, N'Tiện nghi cao cấp'),
+(N'Phòng Tim Mạch 305', 'LP002', 'K009', 2, 300000.00, N'Bảo trì', 0, N'Đang khử khuẩn định kỳ'),
+(N'Phòng Tổng Thống Thần Kinh', 'LP005', 'K010', 1, 3500000.00, N'Sẵn sàng', 1, N'Siêu VIP'),
+(N'Phòng Phẫu Thuật TMH', 'LP010', 'K011', 1, 1500000.00, N'Đang sử dụng', 0, N'Hậu phẫu VIP'),
+(N'Phòng Khám Nha Khoa', 'LP001', 'K012', 4, 150000.00, N'Sẵn sàng', 3, N'Khu vực ghế răng'),
+(N'Phòng Mổ Mắt', 'LP020', 'K013', 2, 200000.00, N'Sẵn sàng', 2, N'Lưu trú sau phẫu thuật Phaco'),
+(N'Phòng Da Liễu Đơn', 'LP018', 'K014', 1, 350000.00, N'Sẵn sàng', 1, N'Không điều hòa'),
+(N'Phòng Cách Ly Âm', 'LP008', 'K015', 1, 2000000.00, N'Đang sử dụng', 0, N'Cách ly ca nhiễm nCov'),
+(N'Phòng Hóa Trị 1', 'LP014', 'K016', 6, 350000.00, N'Sẵn sàng', 4, N'Truyền hóa chất ban ngày'),
+(N'Phòng Siêu Âm VIP', 'LP004', 'K017', 1, 1200000.00, N'Sẵn sàng', 1, N'Lưu chờ kết quả CĐHA'),
+(N'Phòng Chờ Xét Nghiệm', 'LP001', 'K018', 4, 150000.00, N'Sẵn sàng', 4, N'Lấy máu xét nghiệm'),
+(N'Phòng Chăm Sóc Sơ Sinh', 'LP011', 'K006', 5, 800000.00, N'Đang sử dụng', 2, N'Lồng ấp nhi sinh non'),
+(N'Phòng Chạy Thận 1', 'LP013', 'K004', 10, 500000.00, N'Sẵn sàng', 5, N'Có 10 máy chạy thận');
+
+/* ========================================================================================= */
+/* 5. THÊM DỮ LIỆU BẢNG DICHVUYTE                                                            */
+/* ========================================================================================= */
+INSERT INTO DICHVUYTE (MADV, TENDV, DONGIA, MOTA, TRANGTHAI) VALUES
+(1, N'Khám Lâm Sàng Chung', 150000.00, N'Khám bệnh lý tổng quát bởi bác sĩ chuyên khoa', N'Đang áp dụng'),
+(2, N'Khám Chuyên Gia', 500000.00, N'Khám với Phó Giáo Sư, Giáo Sư, Trưởng Khoa', N'Đang áp dụng'),
+(3, N'Siêu Âm Ổ Bụng', 250000.00, N'Siêu âm màu 4D kiểm tra các tạng trong ổ bụng', N'Đang áp dụng'),
+(4, N'X-Quang Ngực Thẳng', 120000.00, N'Chụp X-quang tim phổi kỹ thuật số', N'Đang áp dụng'),
+(5, N'MRI Sọ Não', 2500000.00, N'Chụp cộng hưởng từ sọ não không có thuốc cản từ', N'Đang áp dụng'),
+(6, N'CT Scanner 128 Lát Cắt', 1800000.00, N'Chụp cắt lớp vi tính toàn thân', N'Đang áp dụng'),
+(7, N'Điện Tâm Đồ (ECG)', 80000.00, N'Ghi điện tim phát hiện loạn nhịp', N'Đang áp dụng'),
+(8, N'Nội Soi Dạ Dày', 800000.00, N'Nội soi thực quản, dạ dày, tá tràng không gây mê', N'Đang áp dụng'),
+(9, N'Nội Soi Đại Tràng Gây Mê', 2200000.00, N'Nội soi tầm soát ung thư đại trực tràng có tiền mê', N'Đang áp dụng'),
+(10, N'Xét Nghiệm Máu Tự Động', 150000.00, N'Phân tích tế bào máu ngoại vi 22 thông số', N'Đang áp dụng'),
+(11, N'Sinh Hóa Máu (Glucose, Ure, Creatinin)', 120000.00, N'Đánh giá chức năng gan, thận, đường huyết', N'Đang áp dụng'),
+(12, N'Phẫu Thuật Nội Soi Ruột Thừa', 8000000.00, N'Cắt ruột thừa bằng phương pháp nội soi', N'Đang áp dụng'),
+(13, N'Tán Sỏi Thận Qua Da', 15000000.00, N'Tán sỏi công nghệ Laser xâm lấn tối thiểu', N'Đang áp dụng'),
+(14, N'Nhổ Răng Khôn Mọc Lệch', 1500000.00, N'Tiểu phẫu nhổ răng khôn hàm dưới', N'Đang áp dụng'),
+(15, N'Đo Loãng Xương', 300000.00, N'Đo mật độ xương bằng phương pháp DEXA', N'Đang áp dụng'),
+(16, N'Lọc Máu Chu Kỳ', 800000.00, N'Chạy thận nhân tạo 1 ca (4 tiếng)', N'Đang áp dụng'),
+(17, N'Kéo Dãn Cột Sống', 100000.00, N'Vật lý trị liệu bằng máy kéo dãn', N'Đang áp dụng'),
+(18, N'Tầm Soát Ung Thư Vú', 400000.00, N'Chụp Mammography tuyến vú 2 bên', N'Đang áp dụng'),
+(19, N'Cấp Cứu Ngưng Tim Phổi', 500000.00, N'Hồi sức tim phổi (CPR) tích cực', N'Đang áp dụng'),
+(20, N'Truyền Máu (1 Đơn Vị)', 1200000.00, N'Truyền 250ml khối hồng cầu cùng nhóm', N'Đang áp dụng');
+
+/* ========================================================================================= */
+/* 6. THÊM DỮ LIỆU BẢNG CHITIETVIENPHI (MAHOADON đã có sẵn từ 1001 đến 1020)                   */
+/* ========================================================================================= */
+INSERT INTO CHITIETVIENPHI (MAHOADON, LOAICHIPHI, SOTIEN, MOTA) VALUES
+(1001, N'Tiền Khám Bệnh', 150000.00, N'Khám lâm sàng nội khoa'),
+(1002, N'Tiền Giường Bệnh', 3500000.00, N'Lưu viện 7 ngày phòng Hậu phẫu'),
+(1003, N'Chi Phí Xét Nghiệm', 450000.00, N'Xét nghiệm tổng phân tích tế bào máu'),
+(1004, N'Phẫu Thuật Nội Soi', 8000000.00, N'Cắt ruột thừa nội soi'),
+(1005, N'Tiền Thuốc Nội Trú', 2500000.00, N'Thuốc kháng sinh và dịch truyền'),
+(1006, N'Khám Chuyên Khoa', 150000.00, N'Khám TMH'),
+(1007, N'Vật Tư Y Tế', 800000.00, N'Băng gạc, kim tiêm, dây truyền'),
+(1008, N'Chẩn Đoán Hình Ảnh', 1200000.00, N'Siêu âm tim và X-Quang ngực'),
+(1009, N'Chụp MRI', 2500000.00, N'Cộng hưởng từ khớp gối'),
+(1010, N'Tạm Ứng Phẫu Thuật', 15000000.00, N'Đóng trước phẫu thuật kết hợp xương'),
+(1011, N'Gói Khám Sức Khỏe', 2100000.00, N'Tầm soát sức khỏe tổng quát nâng cao'),
+(1012, N'Tiền Thủ Thuật Nội Soi', 2200000.00, N'Nội soi dạ dày gây mê'),
+(1013, N'Truyền Máu', 2400000.00, N'Truyền 2 đơn vị máu'),
+(1014, N'Siêu Âm Thai 4D', 400000.00, N'Siêu âm hình thái học thai nhi'),
+(1015, N'Vật Lý Trị Liệu', 1500000.00, N'Gói tập phục hồi 10 buổi'),
+(1016, N'Thuốc Ngoại Trú (Mạn tính)', 4500000.00, N'Cấp phát thuốc tiểu đường 3 tháng'),
+(1017, N'Tiền Giường VIP', 8400000.00, N'Nằm viện phòng VIP 7 ngày'),
+(1018, N'Điện Tâm Đồ', 80000.00, N'Đo ECG 12 chuyển đạo'),
+(1019, N'Khám Nhi Khoa', 150000.00, N'Tư vấn dinh dưỡng trẻ em'),
+(1020, N'Lọc Máu Chu Kỳ', 4000000.00, N'Chi phí chạy thận 5 lần/tháng');
+
+/* ========================================================================================= */
+/* 7. THÊM DỮ LIỆU BẢNG LICHHENKHAM                                                          */
+/* ========================================================================================= */
+INSERT INTO LICHHENKHAM (MALICHHEN, MABN, MABACSI, NGAYHEN, GIOHEN, TRANGTHAI, GHICHU) VALUES
+(1, 'BN001', 'NV001', '2026-05-15', '08:30:00', N'Đã xác nhận', N'Tái khám nội khoa định kỳ'),
+(2, 'BN002', 'NV006', '2026-05-16', '09:00:00', N'Đã xác nhận', N'Kiểm tra thai kỳ tuần 28'),
+(3, 'BN003', 'NV008', '2026-05-17', '14:00:00', N'Đã xác nhận', N'Tái khám chấn thương khớp gối'),
+(4, 'BN004', 'NV005', '2026-05-18', '10:15:00', N'Đang chờ khám', N'Tái khám sau mổ ruột thừa'),
+(5, 'BN005', 'NV011', '2026-05-19', '15:30:00', N'Đã hủy', N'Bệnh nhân bận việc đột xuất'),
+(6, 'BN006', 'NV014', '2026-05-20', '08:00:00', N'Đã xác nhận', N'Khám mề đay, dị ứng da'),
+(7, 'BN007', 'NV007', '2026-05-21', '09:45:00', N'Đã xác nhận', N'Tiêm ngừa vắc-xin nhi'),
+(8, 'BN008', 'NV009', '2026-05-22', '13:30:00', N'Đã xác nhận', N'Tái khám huyết áp và tim mạch'),
+(9, 'BN009', 'NV013', '2026-05-23', '10:00:00', N'Đã xác nhận', N'Đo độ cận thị và cắt kính'),
+(10, 'BN010', 'NV012', '2026-05-24', '16:00:00', N'Đã xác nhận', N'Lấy vôi răng và trám răng sâu'),
+(11, 'BN011', 'NV004', '2026-05-25', '07:30:00', N'Đã xác nhận', N'Tái khám dạ dày'),
+(12, 'BN012', 'NV015', '2026-05-26', '14:15:00', N'Đã xác nhận', N'Tái khám viêm gan siêu vi B'),
+(13, 'BN013', 'NV008', '2026-05-27', '08:45:00', N'Đã xác nhận', N'Tháo bột cánh tay'),
+(14, 'BN014', 'NV006', '2026-05-28', '09:30:00', N'Đã hủy', N'Đổi lịch sang tuần sau'),
+(15, 'BN015', 'NV010', '2026-05-29', '15:00:00', N'Đã xác nhận', N'Khám đau đầu mãn tính'),
+(16, 'BN016', 'NV019', '2026-05-30', '10:30:00', N'Đã xác nhận', N'Tư vấn tương tác thuốc sử dụng'),
+(17, 'BN017', 'NV020', '2026-06-01', '13:00:00', N'Đã xác nhận', N'Lên thực đơn tiểu đường thai kỳ'),
+(18, 'BN018', 'NV016', '2026-06-02', '14:30:00', N'Đã xác nhận', N'Kiểm tra định kỳ u nang tuyến giáp'),
+(19, 'BN019', 'NV007', '2026-06-03', '08:15:00', N'Đã xác nhận', N'Kiểm tra sức khỏe đầu năm học'),
+(20, 'BN020', 'NV009', '2026-06-04', '09:00:00', N'Đã xác nhận', N'Làm siêu âm Doppler mạch máu');
