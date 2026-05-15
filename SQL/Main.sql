@@ -499,3 +499,63 @@ INSERT INTO LICHHENKHAM (MALICHHEN, MABN, MABACSI, NGAYHEN, GIOHEN, TRANGTHAI, G
 (18, 'BN018', 'NV016', '2026-06-02', '14:30:00', N'Đã xác nhận', N'Kiểm tra định kỳ u nang tuyến giáp'),
 (19, 'BN019', 'NV007', '2026-06-03', '08:15:00', N'Đã xác nhận', N'Kiểm tra sức khỏe đầu năm học'),
 (20, 'BN020', 'NV009', '2026-06-04', '09:00:00', N'Đã xác nhận', N'Làm siêu âm Doppler mạch máu');
+
+
+-- Thinh's
+INSERT INTO DIEUTRINOITRU (MANOITRU, MABN, MABACSI, MAPHONG, NGAYNHAPVIEN, NGAYXUATVIEN, LYDONHAPVIEN, TINHTRANGRAVIEN) VALUES
+('NT001', 'BN002', 'NV004', 4, '2026-01-20 08:00:00', '2026-01-25 14:00:00', N'Sốt cao liên tục, nghi sốt xuất huyết', N'Khỏe mạnh, sinh hiệu ổn định'),
+('NT002', 'BN004', 'NV005', 5, '2026-02-05 09:30:00', '2026-02-10 10:00:00', N'Đau hố chậu phải, buồn nôn', N'Vết mổ khô, ăn uống bình thường'),
+('NT003', 'BN008', 'NV009', 9, '2026-03-05 10:15:00', '2026-03-12 09:00:00', N'Tức ngực, khó thở', N'Hết khó thở, nhịp tim đều'),
+('NT004', 'BN013', 'NV004', 4, '2026-04-05 15:20:00', '2026-04-10 11:30:00', N'Nôn ra máu, đi ngoài phân đen', N'Cầm máu, niêm mạc hồng'),
+('NT005', 'BN017', 'NV004', 4, '2026-04-15 08:45:00', '2026-04-22 10:00:00', N'Đau đầu dữ dội, chóng mặt', N'Giảm đau đầu, tỉnh táo');
+
+INSERT INTO HOSO (MAHS, MANOITRU, MABN, MABACSI, CHUANDOAN, TRIEUCHUNG, KETLUAN, HUONGDIEUTRI, NGAYKHAM, TRANGTHAIHOSO) VALUES
+('HS001', 'NT001', 'BN002', 'NV004', N'Sốt xuất huyết Dengue', N'Sốt 39 độ, đau cơ', N'Theo dõi sốt xuất huyết độ 2', N'Truyền dịch, hạ sốt', '2026-01-20 08:30:00', N'Đã đóng'),
+('HS002', 'NT002', 'BN004', 'NV005', N'Viêm ruột thừa cấp', N'Đau bụng dưới phải, nôn mửa', N'Viêm ruột thừa cấp tính', N'Mổ nội soi cắt ruột thừa', '2026-02-05 10:00:00', N'Đã đóng'),
+('HS003', 'NT003', 'BN008', 'NV009', N'Suy tim độ 2', N'Khó thở khi gắng sức, phù nhẹ', N'Bệnh tim thiếu máu cục bộ', N'Nội khoa, thuốc trợ tim', '2026-03-05 11:00:00', N'Đã đóng'),
+('HS004', 'NT004', 'BN013', 'NV004', N'Xuất huyết tiêu hóa', N'Nôn ra máu đen, mạch nhanh', N'Loét dạ dày chảy máu', N'Nội soi cầm máu, PPI liều cao', '2026-04-05 16:00:00', N'Đã đóng'),
+('HS005', 'NT005', 'BN017', 'NV004', N'Cơn tăng huyết áp', N'Đau đầu, HA 180/100', N'Tăng huyết áp vô căn', N'Kiểm soát HA bằng thuốc', '2026-04-15 09:30:00', N'Đã đóng');
+
+INSERT INTO THANHTOAN (MATHANHTOAN, MAHOADON, NGAYTHANHTOAN, SOTIEN, PHUONGTHUC, TRANGTHAI) VALUES
+('TT26012001', 1001, '2026-01-20 11:00:00', 1520000.00, N'Tiền mặt', N'Thành công'),
+('TT26012501', 1002, '2026-01-25 16:00:00', 8500000.00, N'Chuyển khoản', N'Thành công'),
+('TT26020201', 1003, '2026-02-02 10:00:00', 450000.00, N'Ví điện tử Momo', N'Thành công'),
+('TT26021001', 1004, '2026-02-10 12:00:00', 12500000.00, N'Thẻ tín dụng (POS)', N'Thành công'),
+('TT26021501', 1005, '2026-02-15 17:00:00', 3200000.00, N'Chuyển khoản', N'Thành công');
+
+INSERT INTO CHITIETVIENPHI (MAHOADON, LOAICHIPHI, SOTIEN, MOTA) VALUES
+(1001, N'Khám bệnh', 150000.00, N'Khám lâm sàng chung'),
+(1001, N'Xét nghiệm', 350000.00, N'Xét nghiệm máu cơ bản'),
+(1001, N'Tiền thuốc', 1020000.00, N'Thuốc mang về'),
+(1002, N'Tiền giường', 1500000.00, N'Nằm viện 5 ngày x 300,000 VND'),
+(1002, N'Phí điều trị', 3000000.00, N'Công bác sĩ và chăm sóc điều dưỡng'),
+(1002, N'Thuốc và Vật tư', 4000000.00, N'Thuốc nội trú và dịch truyền');
+
+INSERT INTO LICHHENKHAM (MALICHHEN, MABN, MABACSI, NGAYHEN, GIOHEN, TRANGTHAI, GHICHU) VALUES
+(1, 'BN001', 'NV001', '2026-05-16', '08:00:00', N'Chưa khám', N'Khám lại định kỳ hô hấp'),
+(2, 'BN003', 'NV004', '2026-05-17', '09:30:00', N'Chưa khám', N'Nhắc BN mang theo kết quả xét nghiệm cũ'),
+(3, 'BN010', 'NV008', '2026-05-15', '14:00:00', N'Đã khám', N'Bệnh nhân khám đau khớp gối'),
+(4, 'BN019', 'NV007', '2026-05-18', '10:00:00', N'Chưa khám', N'Tư vấn dinh dưỡng nhi khoa'),
+(5, 'BN020', 'NV004', '2026-05-20', '15:30:00', N'Đã hủy', N'Bệnh nhân báo bận việc đột xuất');
+
+INSERT INTO LICHSUDIEUTRI (MALS, MAHS, NGAYCAPNHAT, NOIDUNG, MANV, GHICHU) VALUES
+('LS001', 'HS001', '2026-01-21 08:00:00', N'Bệnh nhân còn sốt 38.5 độ, đã truyền 1 chai dịch', 'NV004', N'Tiếp tục theo dõi nhiệt độ'),
+('LS002', 'HS001', '2026-01-23 08:00:00', N'Hết sốt, ăn uống được, tiểu cầu tăng dần', 'NV004', N'Chuẩn bị làm thủ tục xuất viện'),
+('LS003', 'HS002', '2026-02-06 07:30:00', N'Bệnh nhân tỉnh, tiếp xúc tốt sau mổ', 'NV005', N'Thay băng vết mổ, theo dõi dịch tiết'),
+('LS004', 'HS004', '2026-04-06 09:00:00', N'Không thấy nôn máu thêm, phân chuyển vàng', 'NV004', N'Bắt đầu cho ăn lỏng'),
+('LS005', 'HS005', '2026-04-16 08:30:00', N'Huyết áp giảm còn 140/90, bệnh nhân đỡ đau đầu', 'NV004', N'Duy trì phác đồ hạ áp');
+
+INSERT INTO CHITIETDICHVU (MAHS, MADV, NGAYTHUCHIEN, KETQUA, CHIPHI) VALUES
+('HS001', 10, '2026-01-20 09:00:00', N'Tiểu cầu giảm còn 100 G/L', 150000.00),
+('HS002', 3,  '2026-02-05 10:30:00', N'Hình ảnh ruột thừa kích thước 10mm, có dịch mủ bao quanh', 250000.00),
+('HS002', 12, '2026-02-05 14:00:00', N'Phẫu thuật cắt ruột thừa nội soi thành công', 8000000.00),
+('HS003', 7,  '2026-03-05 11:30:00', N'Nhịp xoang, có dấu hiệu thiếu máu cơ tim', 80000.00),
+('HS004', 8,  '2026-04-05 16:30:00', N'Ổ loét bờ cong nhỏ 1.5cm đang rỉ máu', 800000.00);
+
+INSERT INTO TOATHUOC (MATOA, MAHS, MATHUOC, SOLUONG, DONGIA, THANHTIEN, LIEULUONG, CACHDUNG, GHICHU) VALUES
+('T001', 'HS001', 1, 10, 1500.00, 15000.00, N'1 viên/lần, 2 lần/ngày', N'Uống sau ăn khi sốt > 38.5 độ', N'Paracetamol 500mg'),
+('T001', 'HS001', 20, 10, 3000.00, 30000.00, N'1 viên/ngày', N'Pha nước uống vào buổi sáng', N'Vitamin C tăng đề kháng'),
+('T002', 'HS002', 2, 20, 3500.00, 70000.00, N'1 viên/lần, 2 lần/ngày', N'Uống sau ăn', N'Kháng sinh phòng nhiễm trùng'),
+('T003', 'HS003', 6, 30, 3000.00, 90000.00, N'1 viên/ngày', N'Uống đều đặn vào buổi sáng', N'Hạ huyết áp'),
+('T004', 'HS004', 8, 14, 1800.00, 25200.00, N'1 viên/lần, 2 lần/ngày', N'Uống trước ăn sáng 30 phút', N'Giảm tiết axit dạ dày');
+GO
