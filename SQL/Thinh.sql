@@ -82,3 +82,112 @@ CREATE TABLE TOATHUOC (
 	CONSTRAINT FK_TOATHUOC_HOSO FOREIGN KEY (MAHS) REFERENCES HOSO(MAHS),
 	CONSTRAINT FK_TOATHUOC_THUOC FOREIGN KEY (MATHUOC) REFERENCES THUOC(MATHUOC),
 );
+
+
+-- a) 5 câu truy vấn đơn giản:
+-- 1. Lấy danh sách tất cả bệnh nhân có giới tính là "Nữ"
+SELECT * 
+FROM BENHNHAN 
+WHERE GIOITINH = N'Nữ';
+
+-- 2. Hiển thị thông tin thuốc có giá trên 5k
+SELECT TENTHUOC, DONVI, GIA, SOLUONGTON
+FROM THUOC
+WHERE GIA > 5000;
+
+-- 3. Tìm kiếm nhân viên có họ hoặc tên chứa chữ "Nguyễn"
+SELECT MANV, HOTEN, CHUCVU, SODT
+FROM NHANVIEN
+WHERE HOTEN LIKE N'%Nguyễn%';
+
+-- 4. Đếm tổng số lượng hóa đơn viện phí chưa được thanh toán
+SELECT COUNT(*) AS SoHoaDonChuaThanhToan
+FROM HOADONVIENPHI
+WHERE TRANGTHAITHANHTOAN = N'Chưa thanh toán';
+
+-- 5. Xem danh sách các phòng bệnh lớn có sức chứa từ 5 người trở lên
+SELECT MAPHONG, TENPHONG, SUCCHUA, GIAPHONG
+FROM PHONGBENH
+WHERE SUCCHUA >= 5;
+
+
+-- c) Truy vấn với mệnh đề having
+-- 13. Tìm các chức vụ có từ 3 nhân viên trở lên
+SELECT CHUCVU, COUNT(*) AS SoLuongNhanVien
+FROM NHANVIEN
+GROUP BY CHUCVU
+HAVING COUNT(*) >= 3;
+
+-- 14. Thống kê các đơn vị tính của thuốc có giá trung bình lớn hơn 15k
+SELECT DONVI, AVG(GIA) AS GiaTrungBinh
+FROM THUOC
+GROUP BY DONVI
+HAVING AVG(GIA) > 15000;
+
+-- 15. Tìm các mức giá phòng bệnh đang có nhiều hơn 2 phòng áp dụng
+SELECT GIAPHONG, COUNT(*) AS SoPhongCungMucGia
+FROM PHONGBENH
+GROUP BY GIAPHONG
+HAVING COUNT(*) > 2;
+
+-- 16. Tìm các bệnh nhân đã đặt lịch hẹn khám từ 2 lần trở lên
+SELECT MABN, COUNT(*) AS SoLanHenKham
+FROM LICHHENKHAM
+GROUP BY MABN
+HAVING COUNT(*) >= 2;
+
+-- 17. Tìm các hồ sơ bệnh án được kê từ 3 loại thuốc trở lên trong toa
+SELECT MAHS, COUNT(MATHUOC) AS SoLoaiThuocDuocKe
+FROM TOATHUOC
+GROUP BY MAHS
+HAVING COUNT(MATHUOC) >= 3;
+
+
+-- f) Truy vấn Hợp/Giao/Trừ
+-- 27. Lấy danh sách liên hệ của cả Bệnh nhân và Nhân viên
+SELECT 
+    HOTEN AS HoTen, 
+    SDT AS SoDienThoai, 
+    N'Bệnh Nhân' AS NhomDoiTuong 
+FROM BENHNHAN
+
+UNION
+
+SELECT 
+    HOTEN AS HoTen, 
+    SODT AS SoDienThoai, 
+    N'Nhân Viên' AS NhomDoiTuong 
+FROM NHANVIEN;
+
+-- 28. Tìm danh sách các Bác sĩ (Mã bác sĩ, Họ tên, Chuyên môn) vừa tham gia khám ngoại trú,
+--    vừa tham gia điều trị nội trú
+SELECT 
+    NV.MANV AS MaBacSi, 
+    NV.HOTEN AS TenBacSi, 
+    NV.CHUYENMON AS ChuyenMon
+FROM NHANVIEN NV
+JOIN LICHHENKHAM LHK ON NV.MANV = LHK.MABACSI
+INTERSECT
+SELECT 
+    NV.MANV AS MaBacSi, 
+    NV.HOTEN AS TenBacSi, 
+    NV.CHUYENMON AS ChuyenMon
+FROM NHANVIEN NV
+JOIN DIEUTRINOITRU DTNT ON NV.MANV = DTNT.MABACSI;
+
+-- 29.Tìm danh sách các Bệnh nhân (Mã bệnh nhân, Họ tên, Số điện thoại) đã từng có Hồ sơ khám bệnh, 
+--   nhưng KHÔNG phát sinh bất kỳ dịch vụ y tế nào lưu trong bảng CHITIETDICHVU
+SELECT 
+    BN.MABN, 
+    BN.HOTEN, 
+    BN.SDT
+FROM BENHNHAN BN
+JOIN HOSO HS ON BN.MABN = HS.MABN
+EXCEPT
+SELECT 
+    BN.MABN, 
+    BN.HOTEN, 
+    BN.SDT
+FROM BENHNHAN BN
+JOIN HOSO HS ON BN.MABN = HS.MABN
+JOIN CHITIETDICHVU CTDV ON HS.MAHS = CTDV.MAHS;
