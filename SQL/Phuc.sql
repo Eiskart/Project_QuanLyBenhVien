@@ -71,10 +71,10 @@ FROM THANHTOAN
 WHERE TRANGTHAI = N'Thành công'
 GROUP BY PHUONGTHUC;
 
--- Ý nghĩa: Đánh giá quy mô phân bổ giường bệnh giữa các chuyên khoa (Khoa Sản, Khoa Nhi...).
-SELECT MAKHOA, MIN(SUCCHUA) AS SucchuaNhoNhat, MAX(SUCCHUA) AS SucchuaLonNhat
-FROM PHONGBENH
-GROUP BY MAKHOA;
+--Giúp bệnh viện quản lý biên độ giá của các nhóm thuốc (Viên, Chai, Lọ, Ống...).
+SELECT DONVI, MIN(GIA) AS GiaThapNhat, MAX(GIA) AS GiaCaoNhat
+FROM THUOC
+GROUP BY DONVI;
 
 --------------------------Truy vấn g) Truy vấn với Update & Delete------------------------------------------------
 
