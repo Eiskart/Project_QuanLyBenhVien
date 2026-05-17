@@ -635,6 +635,200 @@ INSERT INTO TOATHUOC (MATOA, MAHS, MATHUOC, SOLUONG, DONGIA, THANHTIEN, LIEULUON
 ('TOA020', 'HS020', 6, 30, 3000.00, 90000.00, N'1 viên/lần', N'Sáng 1 viên', N'Hạ áp'),
 ('TOA020', 'HS020', 16, 30, 1000.00, 30000.00, N'1 viên/lần', N'Tối 1 viên', N'Chống đông máu');
 GO
+
+
+------------------------------------------------- THỦ TỤC ---------------------------------------------------------------------
+/*========= 1. Tìm kiếm thuốc theo tên tương đối ===*/
+CREATE PROCEDURE sp_TimKiemThuoc
+    @TenThuoc NVARCHAR(100)/* */
+AS
+BEGIN
+    SELECT MATHUOC, TENTHUOC, DONVI, GIA, SOLUONGTON
+    FROM THUOC
+    WHERE TENTHUOC LIKE '%' + @TenThuoc + '%';
+END;
+GO
+
+-- Ví dụ tìm các loại thuốc có chữ "Para" (như Paracetamol)
+EXEC sp_TimKiemThuoc @TenThuoc = N'Para';
+
+
+/*========= 2. Thêm dữ liệu dăng ký lịch hẹn khám mới ===*/
+CREATE PROCEDURE sp_DatLichHen
+    @MaLichHen INT,
+    @MaBN VARCHAR(20),
+    @MaBacSi VARCHAR(20),
+    @NgayHen DATE,
+    @GioHen TIME,
+    @TrangThai NVARCHAR(50) = N'Đang chờ khám', -- Đặt mặc định nếu không truyền vào
+    @GhiChu NVARCHAR(255) = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    INSERT INTO LICHHENKHAM (MALICHHEN, MABN, MABACSI, NGAYHEN, GIOHEN, TRANGTHAI, GHICHU)
+    VALUES (@MaLichHen, @MaBN, @MaBacSi, @NgayHen, @GioHen, @TrangThai, @GhiChu);
+END;
+GO
+
+-- (Note!! sử dụng code dưới đây trước và sau khi thực hiện ví dụ để ktra thủ tục/ví dụ có hoạt động không)
+SELECT MALICHHEN, MABN, MABACSI, NGAYHEN, GIOHEN, TRANGTHAI, GHICHU 
+FROM LICHHENKHAM 
+WHERE MALICHHEN = 21;
+
+-- Ví dụ: Thêm một lịch hẹn mới (đồng thời tận dụng luôn giá trị mặc định của trạng thái)
+EXEC sp_DatLichHen 
+    @MaLichHen = 21, 
+    @MaBN = 'BN020', 
+    @MaBacSi = 'NV009', 
+    @NgayHen = '2026-06-05', 
+    @GioHen = '07:30:00', 
+    -- Bỏ qua @TrangThai để nhận giá trị mặc định
+    @GhiChu = N'Kiểm tra lại chỉ số đường huyết';
+
+/*========= 3. Thêm chi tiết kê toa thuốc cho hồ sơ bệnh án ===*/
+CREATE PROCEDURE sp_KeToaThuoc
+    @MaToa VARCHAR(20),
+    @MaHS VARCHAR(20),
+    @MaThuoc INT,
+    @SoLuong INT,
+    @DonGia DECIMAL(18, 2),
+    @LieuLuong NVARCHAR(100),
+    @CachDung NVARCHAR(255),
+    @GhiChu NVARCHAR(255) = NULL
+AS
+BEGIN
+    -- Tối ưu hiệu suất hệ thống
+    SET NOCOUNT ON;
+
+    -- Tự động tính Thành tiền = Số lượng x Đơn giá
+    DECLARE @ThanhTien DECIMAL(18, 2) = @SoLuong * @DonGia;
+
+    -- Thực hiện chèn dữ liệu (Bỏ qua cột ID tự tăng)
+    INSERT INTO TOATHUOC (MATOA, MAHS, MATHUOC, SOLUONG, DONGIA, THANHTIEN, LIEULUONG, CACHDUNG, GHICHU)
+    VALUES (@MaToa, @MaHS, @MaThuoc, @SoLuong, @DonGia, @ThanhTien, @LieuLuong, @CachDung, @GhiChu);
+END;
+GO
+
+-- (Note!! sử dụng code dưới đây trước và sau khi thực hiện ví dụ để ktra thủ tục/ví dụ có hoạt động không)
+SELECT MATOA, MAHS, MATHUOC, SOLUONG, DONGIA, THANHTIEN, CACHDUNG 
+FROM TOATHUOC 
+WHERE MATOA = 'TOA001';
+
+-- Ví dụ: Kê đơn thuốc Kháng sinh
+EXEC sp_KeToaThuoc
+    @MaToa = 'TOA001',
+    @MaHS = 'HS001',
+    @MaThuoc = 2,
+    @SoLuong = 20,
+    @DonGia = 3500.00,
+    @LieuLuong = N'1 viên/lần',
+    @CachDung = N'Sáng 1 viên, Tối 1 viên sau ăn',
+    @GhiChu = N'Kháng sinh';
+
+
+/*========= 4. Cập nhật thanh toán hóa đơn viện phí ===*/
+CREATE PROCEDURE sp_ThanhToanHoaDon
+    @MaHoaDon INT,
+    @GhiChuMoi NVARCHAR(255) = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+    UPDATE HOADONVIENPHI
+    SET TRANGTHAITHANHTOAN = N'Đã thanh toán', -- Cập nhật trạng thái thành 'Đã thanh toán'
+        GHICHU = COALESCE(@GhiChuMoi, GHICHU) -- Nếu người dùng truyền vào ghi chú mới thì cập nhật, nếu không thì giữ nguyên ghi chú cũ
+    WHERE MAHOADON = @MaHoaDon;
+END;
+GO
+
+-- (Note!! sử dụng code dưới đây trước và sau khi thực hiện ví dụ để ktra thủ tục/ví dụ có hoạt động không)
+SELECT MAHOADON, MABN, TONGTIEN, TRANGTHAITHANHTOAN, GHICHU 
+FROM HOADONVIENPHI 
+WHERE MAHOADON = 1007;
+
+-- Ví dụ: thanh toán hóa đơn số 1007 và cập nhật ghi chú mới
+EXEC sp_ThanhToanHoaDon 
+    @MaHoaDon = 1007, 
+    @GhiChuMoi = N'Bảo hiểm đã duyệt và tất toán toàn bộ';
+
+
+/*========= 5. Hủy lịch hẹn khám ===*/
+CREATE PROCEDURE sp_HuyLichHen
+    @MaLichHen INT,
+    @LyDoHuy NVARCHAR(255) = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    UPDATE LICHHENKHAM
+    SET TRANGTHAI = N'Đã hủy',
+        GHICHU = COALESCE(@LyDoHuy, N'Bệnh nhân báo hủy lịch đột xuất') -- Chuyển trạng thái sang 'Đã hủy' và cập nhật lý do hủy vào cột GHICHU
+    WHERE MALICHHEN = @MaLichHen 
+      AND TRANGTHAI IN (N'Đang chờ khám', N'Đã xác nhận'); -- Chỉ cho phép hủy các lịch hẹn đang ở trạng thái 'Đang chờ khám' hoặc 'Đã xác nhận'
+END;
+GO
+
+-- Ví dụ: Hủy lịch hẹn và ghi đè lý do hủy mới
+EXEC sp_HuyLichHen 
+    @MaLichHen = 4, 
+    @LyDoHuy = N'Bệnh nhân xin đổi lịch sang tuần sau do trùng lịch công tác';
+
+
+/*========= 6. Tính tổng doanh thu dịch vụ theo khoảng thời gian ===*/
+CREATE PROCEDURE sp_ThongKeDoanhThuDichVuTrucTiep
+    @TuNgay DATE,
+    @DenNgay DATE
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT 
+        DV.TENDV,
+        COUNT(CD.MADV) AS TongSoLanThucHien,
+        SUM(CD.CHIPHI) AS TongDoanhThu
+    FROM CHITIETDICHVU CD
+    JOIN DICHVUYTE DV ON CD.MADV = DV.MADV
+    WHERE CAST(CD.NGAYTHUCHIEN AS DATE) BETWEEN @TuNgay AND @DenNgay -- Lọc thẳng bằng ngày thực hiện
+    GROUP BY DV.TENDV
+    ORDER BY TongDoanhThu DESC;
+END;
+GO
+
+-- Ví dụ: Xem báo cáo doanh thu dịch vụ phát sinh trong quý 1 năm 2026
+EXEC sp_ThongKeDoanhThuDichVuTrucTiep
+    @TuNgay = '2026-01-01',
+    @DenNgay = '2026-03-31';
+
+
+/*========= 7. In danh sách bệnh nhân nội trú của một khoa ===*/
+CREATE PROCEDURE sp_DanhSachBenhNhanTheoKhoa
+    @MaKhoa VARCHAR(20)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT 
+        BN.MABN, 
+        BN.HOTEN, 
+        BN.GIOITINH, 
+        PB.TENPHONG,        -- Lấy tên phòng từ dữ liệu mới (ví dụ: N'Cấp Cứu A1', N'Phòng Hậu Phẫu 402'...)
+        PB.GIAPHONG,        -- Hiển thị thêm giá phòng để kiểm tra chi phí
+        DT.MANOITRU,
+        DT.NGAYNHAPVIEN, 
+        DT.LYDONHAPVIEN,
+        DT.TINHTRANGRAVIEN AS TrangThaiHienTai
+    FROM BENHNHAN BN
+    JOIN DIEUTRINOITRU DT ON BN.MABN = DT.MABN
+    JOIN PHONGBENH PB ON DT.MAPHONG = PB.MAPHONG -- Khớp nối bằng ID phòng tự động tăng
+    WHERE PB.MAKHOA = @MaKhoa 
+      AND DT.NGAYXUATVIEN IS NULL; -- Chỉ lấy bệnh nhân chưa xuất viện (đang nằm điều trị)
+END;
+GO
+
+-- Ví dụ: Lấy danh sách bệnh nhân đang nằm tại khoa Sản (K006)
+EXEC sp_DanhSachBenhNhanTheoKhoa @MaKhoa = 'K006';
+
+
 ------------------------------------------------- HÀM ---------------------------------------------------------------------
 -- 1.Hàm tính tuổi của bệnh nhân
 CREATE FUNCTION fn_TinhTuoiBenhNhan (@MaBN VARCHAR(10))
