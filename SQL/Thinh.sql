@@ -191,3 +191,79 @@ SELECT
 FROM BENHNHAN BN
 JOIN HOSO HS ON BN.MABN = HS.MABN
 JOIN CHITIETDICHVU CTDV ON HS.MAHS = CTDV.MAHS;
+
+
+
+
+
+------------------------------------------------- THỦ TỤC ---------------------------------------------------------------------
+/*========= 1. Tìm kiếm thuốc theo tên tương đối ===*/
+
+
+-- Ví dụ tìm các loại thuốc có chữ "Para" (như Paracetamol)
+EXEC sp_TimKiemThuoc @TenThuoc = N'Para';
+
+
+/*========= 2. Thêm dữ liệu dăng ký lịch hẹn khám mới ===*/
+-- (Note!! sử dụng code dưới đây trước và sau khi thực hiện ví dụ để ktra thủ tục/ví dụ có hoạt động không)
+SELECT MALICHHEN, MABN, MABACSI, NGAYHEN, GIOHEN, TRANGTHAI, GHICHU 
+FROM LICHHENKHAM 
+WHERE MALICHHEN = 21;
+
+-- Ví dụ: Thêm một lịch hẹn mới (đồng thời tận dụng luôn giá trị mặc định của trạng thái)
+EXEC sp_DatLichHen 
+    @MaLichHen = 21, 
+    @MaBN = 'BN020', 
+    @MaBacSi = 'NV009', 
+    @NgayHen = '2026-06-05', 
+    @GioHen = '07:30:00', 
+    -- Bỏ qua @TrangThai để nhận giá trị mặc định
+    @GhiChu = N'Kiểm tra lại chỉ số đường huyết';
+
+
+/*========= 3. Thêm chi tiết kê toa thuốc cho hồ sơ bệnh án ===*/
+-- (Note!! sử dụng code dưới đây trước và sau khi thực hiện ví dụ để ktra thủ tục/ví dụ có hoạt động không)
+SELECT MATOA, MAHS, MATHUOC, SOLUONG, DONGIA, THANHTIEN, CACHDUNG 
+FROM TOATHUOC 
+WHERE MATOA = 'TOA001';
+
+-- Ví dụ: Kê đơn thuốc Kháng sinh
+EXEC sp_KeToaThuoc
+    @MaToa = 'TOA001',
+    @MaHS = 'HS001',
+    @MaThuoc = 2,
+    @SoLuong = 20,
+    @DonGia = 3500.00,
+    @LieuLuong = N'1 viên/lần',
+    @CachDung = N'Sáng 1 viên, Tối 1 viên sau ăn',
+    @GhiChu = N'Kháng sinh';
+
+/*========= 4. Cập nhật thanh toán hóa đơn viện phí ===*/
+-- (Note!! sử dụng code dưới đây trước và sau khi thực hiện ví dụ để ktra thủ tục/ví dụ có hoạt động không)
+SELECT MAHOADON, MABN, TONGTIEN, TRANGTHAITHANHTOAN, GHICHU 
+FROM HOADONVIENPHI 
+WHERE MAHOADON = 1007;
+
+-- Ví dụ: thanh toán hóa đơn số 1007 và cập nhật ghi chú mới
+EXEC sp_ThanhToanHoaDon 
+    @MaHoaDon = 1007, 
+    @GhiChuMoi = N'Bảo hiểm đã duyệt và tất toán toàn bộ';
+
+/*========= 5. Hủy lịch hẹn khám ===*/
+
+-- Ví dụ: Hủy lịch hẹn và ghi đè lý do hủy mới
+EXEC sp_HuyLichHen 
+    @MaLichHen = 4, 
+    @LyDoHuy = N'Bệnh nhân xin đổi lịch sang tuần sau do trùng lịch công tác';
+
+/*========= 6. Tính tổng doanh thu dịch vụ theo khoảng thời gian ===*/
+-- Ví dụ: Xem báo cáo doanh thu dịch vụ phát sinh trong quý 1 năm 2026
+EXEC sp_ThongKeDoanhThuDichVuTrucTiep
+    @TuNgay = '2026-01-01',
+    @DenNgay = '2026-03-31';
+
+
+/*========= 7. In danh sách bệnh nhân nội trú của một khoa ===*/
+-- Ví dụ: Lấy danh sách bệnh nhân đang nằm tại khoa Sản (K006)
+EXEC sp_DanhSachBenhNhanTheoKhoa @MaKhoa = 'K006';
+
