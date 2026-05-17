@@ -79,8 +79,8 @@ CREATE TABLE NHANVIEN (
     CHUCVU NVARCHAR(50),    
     EMAIL VARCHAR(50),
     NGAYVAOLAM DATE,
-    BANGCAP VARCHAR(50),
-    CHUYENMON VARCHAR(50),
+    BANGCAP NVARCHAR(50),
+    CHUYENMON NVARCHAR(50),
     TRANGTHAI NVARCHAR(50),
     CONSTRAINT PK_NV PRIMARY KEY (MANV),
     CONSTRAINT FK_NV_KHOA FOREIGN KEY (MAKHOA) REFERENCES KHOA(MAKHOA)
@@ -634,3 +634,110 @@ INSERT INTO TOATHUOC (MATOA, MAHS, MATHUOC, SOLUONG, DONGIA, THANHTIEN, LIEULUON
 ('TOA018', 'HS018', 20, 15, 3000.00, 45000.00, N'1 viên/lần', N'Sáng 1 viên', N'Bổ sung thể lực'),
 ('TOA020', 'HS020', 6, 30, 3000.00, 90000.00, N'1 viên/lần', N'Sáng 1 viên', N'Hạ áp'),
 ('TOA020', 'HS020', 16, 30, 1000.00, 30000.00, N'1 viên/lần', N'Tối 1 viên', N'Chống đông máu');
+GO
+-- HÀM
+-- 1.Hàm tính tuổi của bệnh nhân
+CREATE FUNCTION fn_TinhTuoiBenhNhan (@MaBN VARCHAR(10))
+RETURNS INT
+AS
+BEGIN
+    DECLARE @Tuoi INT;
+    SELECT @Tuoi = YEAR(GETDATE()) - YEAR(NGAYSINH) 
+    FROM BENHNHAN 
+    WHERE MABN = @MaBN;
+    
+    RETURN @Tuoi;
+END;
+GO
+
+-- 2.Hàm tính tổng tiền thuốc của một hồ sơ khám bệnh
+CREATE FUNCTION fn_TongTienThuocHoSo (@MaHS VARCHAR(10))
+RETURNS DECIMAL(18,2)
+AS
+BEGIN
+    DECLARE @TongTien DECIMAL(18,2);
+    SELECT @TongTien = ISNULL(SUM(SOLUONG * DONGIA), 0) 
+    FROM TOATHUOC 
+    WHERE MAHS = @MaHS;
+    
+    RETURN @TongTien;
+END;
+GO
+
+-- 3.Hàm tính tổng doanh thu từ một dịch vụ y tế
+CREATE FUNCTION fn_TongDoanhThuDichVu (@MaDV INT)
+RETURNS DECIMAL(18,2)
+AS
+BEGIN
+    DECLARE @TongDoanhThu DECIMAL(18,2);
+    SELECT @TongDoanhThu = ISNULL(SUM(CHIPHI), 0) 
+    FROM CHITIETDICHVU 
+    WHERE MADV = @MaDV;
+    
+    RETURN @TongDoanhThu;
+END;
+GO
+
+-- 4.Hàm kiểm tra tổng số giường trống của một khoa
+CREATE FUNCTION fn_DemGiuongTrongTheoKhoa (@MaKhoa VARCHAR(10))
+RETURNS INT
+AS
+BEGIN
+    DECLARE @SoGiuong INT;
+    SELECT @SoGiuong = ISNULL(SUM(SOGIUONGTRONG), 0) 
+    FROM PHONGBENH 
+    WHERE MAKHOA = @MaKhoa;
+    
+    RETURN @SoGiuong;
+END;
+GO
+
+-- 5.Hàm lấy danh sách bệnh nhân do một bác sĩ phụ trách
+CREATE FUNCTION fn_DanhSachBenhNhanCuaBacSi (@MaBacSi VARCHAR(10))
+RETURNS TABLE
+AS
+RETURN (
+    SELECT DISTINCT BN.MABN, BN.HOTEN, BN.SDT, BN.CCCD
+    FROM BENHNHAN BN
+    JOIN HOSO HS ON BN.MABN = HS.MABN
+    WHERE HS.MABACSI = @MaBacSi
+);
+GO
+
+-- 6.Hàm cảnh báo thuốc sắp hết hạn
+CREATE FUNCTION fn_ThuocSapHetHan (@SoThang INT)
+RETURNS TABLE
+AS
+RETURN (
+    SELECT MATHUOC, TENTHUOC, HANSUDUNG, SOLUONGTON
+    FROM THUOC
+    WHERE DATEDIFF(MONTH, GETDATE(), HANSUDUNG) <= @SoThang 
+      AND TRANGTHAI = N'Còn hàng'
+);
+GO
+
+-- 7.Hàm tra cứu lịch sử khám bệnh của một bệnh nhân
+CREATE FUNCTION fn_LichSuKhamBenh (@MaBN VARCHAR(10))
+RETURNS TABLE
+AS
+RETURN (
+    SELECT HS.MAHS, HS.NGAYKHAM, HS.CHUANDOAN, K.TENKHOA, NV.HOTEN AS TENBACSI
+    FROM HOSO HS
+    JOIN NHANVIEN NV ON HS.MABACSI = NV.MANV
+    JOIN KHOA K ON NV.MAKHOA = K.MAKHOA
+    WHERE HS.MABN = @MaBN
+);
+GO
+
+-- 8.Hàm trích xuất danh sách lịch hẹn theo ngày
+CREATE FUNCTION fn_LichHenTheoNgay (@NgayHen DATE)
+RETURNS TABLE
+AS
+RETURN (
+    SELECT LHK.MALICHHEN, LHK.GIOHEN, BN.HOTEN AS TENBENHNHAN, NV.HOTEN AS TENBACSI, LHK.TRANGTHAI
+    FROM LICHHENKHAM LHK
+    JOIN BENHNHAN BN ON LHK.MABN = BN.MABN
+    JOIN NHANVIEN NV ON LHK.MABACSI = NV.MANV
+    WHERE LHK.NGAYHEN = @NgayHen
+);
+GO
