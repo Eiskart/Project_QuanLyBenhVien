@@ -964,11 +964,11 @@ GO
 -- 1. tạo login cho server
 USE master;
 GO
-CREATE LOGIN LoginADMIN WITH PASSWORD = 'AdminPassword123!';
-CREATE LOGIN LoginBACSI WITH PASSWORD = 'DoctorPassword123!';
-CREATE LOGIN LoginYTA WITH PASSWORD = 'NursePassword123!';
-CREATE LOGIN LoginKETOAN WITH PASSWORD = 'AccountantPassword123!';
-CREATE LOGIN LoginDUOCSI WITH PASSWORD = 'PharmacistPassword123!';
+CREATE LOGIN LoginADMIN WITH PASSWORD = 'Password123!';
+CREATE LOGIN LoginBACSI WITH PASSWORD = 'Password123!';
+CREATE LOGIN LoginYTA WITH PASSWORD = 'Password123!';
+CREATE LOGIN LoginKETOAN WITH PASSWORD = 'Password123!';
+CREATE LOGIN LoginDUOCSI WITH PASSWORD = 'Password123!';
 GO
 
 -- 2. Tạo user trong csdl cho mỗi login
