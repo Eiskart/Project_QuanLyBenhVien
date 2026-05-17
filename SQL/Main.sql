@@ -880,6 +880,7 @@ RETURN (
 GO
 ---------------------------------------------- TRIGGER ----------------------------------------------------------------------
 USE QuanLyBenhVien;
+DROP TRIGGER IF EXISTS  trg_KiemTraNgayNhapHS;
 GO
 -- 1 kiểm tra ngày nhập hồ sơ so với ngày sinh
 CREATE TRIGGER trg_KiemTraNgayNhapHS
@@ -900,6 +901,8 @@ BEGIN
 END;
 GO
 --2 Khi thêm một loại thuốc mới vào kho, nếu số lượng tồn lớn hơn 0 thì tự động đặt trạng thái thành 'Còn hàng'. Nếu bằng 0 thì tự động đặt là 'Hết hàng'.
+DROP TRIGGER IF EXISTS trg_TuDongCapNhatTrangThaiThuoc;
+GO
 CREATE TRIGGER trg_TuDongCapNhatTrangThaiThuoc
 ON THUOC
 AFTER INSERT, UPDATE
@@ -921,6 +924,8 @@ BEGIN
 END;
 GO 
 -- 3 tự động tính thành tiền cho toa thuốc 
+DROP TRIGGER IF EXISTS trg_TinhThanhTienToaThuoc;
+GO
 CREATE TRIGGER trg_TinhThanhTienToaThuoc
 ON TOATHUOC
 AFTER INSERT, UPDATE
@@ -934,6 +939,8 @@ BEGIN
 END;
 GO
 -- 4 tự động trừ số lượng tồn của thuốc sau khi kê đơn thuốc
+DROP TRIGGER IF EXISTS trg_TruKhoKhiKeToa;
+GO
 CREATE TRIGGER trg_TruKhoKhiKeToa
 ON TOATHUOC
 AFTER INSERT
@@ -946,6 +953,8 @@ BEGIN
 END;
 GO
 -- 5 thay vì xóa dữ liệu nhân viên thì cập nhật trạng thái sang nghỉ việc
+DROP TRIGGER IF EXISTS trg_XoaMemNhanVien;
+GO
 CREATE TRIGGER trg_XoaMemNhanVien
 ON NHANVIEN
 INSTEAD OF DELETE
