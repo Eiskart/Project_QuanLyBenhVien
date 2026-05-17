@@ -103,3 +103,98 @@ CREATE TABLE DICHVUYTE (
 ALTER TABLE PHONGBENH
 ADD CONSTRAINT FK_PHONGBENH_LOAIPHONG 
 FOREIGN KEY (MALOAIPHONG) REFERENCES LOAIPHONG(MALOAIPHONG)
+-- Truy vấn
+-- d. Truy vấn lớn nhất, nhỏ nhất
+-- d.1 Tìm bệnh nhân có tổng tiền hóa đơn viện phí cao nhất.
+SELECT TOP 1 BN.MABN, BN.HOTEN, HD.TONGTIEN
+FROM BENHNHAN BN
+JOIN HOADONVIENPHI HD ON BN.MABN = HD.MABN
+ORDER BY HD.TONGTIEN DESC;
+-- d.2 Tìm loại thuốc có số lượng tồn kho ít nhất.
+SELECT TOP 1 MATHUOC, TENTHUOC, SOLUONGTON, DONVI
+FROM THUOC
+ORDER BY SOLUONGTON ASC;
+-- d.3 Tìm nhân viên đảm nhận nhiều hồ sơ bệnh án nhất.
+SELECT TOP 1 NV.MANV, NV.HOTEN, COUNT(HS.MAHS) AS SoLuongHoSoDamNhan
+FROM NHANVIEN NV
+JOIN HOSO HS ON NV.MANV = HS.MABACSI
+GROUP BY NV.MANV, NV.HOTEN
+ORDER BY COUNT(HS.MAHS) DESC;
+-- d.4 Tìm dịch vụ y tế có đơn giá rẻ nhất đang được áp dụng.
+SELECT TOP 1 MADV, TENDV, DONGIA
+FROM DICHVUYTE
+WHERE TRANGTHAI = N'Đang áp dụng'
+ORDER BY DONGIA ASC;
+-- e. Truy vấn Không/Chưa có (NOT IN, LEFT/RIGHT JOIN)
+-- e.1 Tìm các bệnh nhân chưa từng đặt bất kỳ lịch hẹn khám nào.
+SELECT BN.MABN, BN.HOTEN, BN.SDT
+FROM BENHNHAN BN
+LEFT JOIN LICHHENKHAM LHK ON BN.MABN = LHK.MABN
+WHERE LHK.MALICHHEN IS NULL;
+-- e.2 Tìm các loại thuốc chưa từng được kê trong bất kỳ toa thuốc nào của bệnh nhân.
+SELECT MATHUOC, TENTHUOC, HOATCHAT
+FROM THUOC
+WHERE MATHUOC NOT IN (
+    SELECT DISTINCT MATHUOC 
+    FROM TOATHUOC
+);
+-- e.3 Tìm các khoa chưa được bố trí phòng bệnh nào.
+SELECT K.MAKHOA, K.TENKHOA
+FROM KHOA K
+LEFT JOIN PHONGBENH PB ON K.MAKHOA = PB.MAKHOA
+WHERE PB.MAPHONG IS NULL;
+-- e.4 Tìm các bác sĩ/nhân viên y tế chưa từng khám hay tạo lập hồ sơ (HOSO) nào cho bệnh nhân.
+SELECT MANV, HOTEN, CHUYENMON
+FROM NHANVIEN
+WHERE CHUCVU LIKE N'%Bác sĩ%' OR CHUYENMON IS NOT NULL 
+AND MANV NOT IN (
+    SELECT DISTINCT MABACSI 
+    FROM HOSO
+);
+-- e.5 Tìm các dịch vụ y tế chưa từng được thực hiện cho bất kỳ bệnh nhân nào (chưa có trong chi tiết dịch vụ của hồ sơ).
+SELECT DV.MADV, DV.TENDV, DV.DONGIA
+FROM CHITIETDICHVU CT
+RIGHT JOIN DICHVUYTE DV ON CT.MADV = DV.MADV
+WHERE CT.MAHS IS NULL;
+-- h. Truy vấn sử dụng phép Chia (Relational Division)
+-- h.1 Tìm những bệnh nhân đã chưa từng sử dụng dịch vụ y tế có trong bệnh viện.
+SELECT BN.MABN, BN.HOTEN
+FROM BENHNHAN BN
+LEFT JOIN HOSO HS ON BN.MABN = HS.MABN
+LEFT JOIN CHITIETDICHVU CTDV ON HS.MAHS = CTDV.MAHS
+GROUP BY BN.MABN, BN.HOTEN
+HAVING COUNT(CTDV.MADV) = 0;
+-- h.2 Tìm bác sĩ đã từng điều trị (tạo hồ sơ) cho TẤT CẢ các bệnh nhân có trong hệ thống.
+SELECT NV.MANV, NV.HOTEN
+FROM NHANVIEN NV
+WHERE NOT EXISTS (
+    SELECT MABN 
+    FROM BENHNHAN
+
+    EXCEPT
+
+    SELECT MABN 
+    FROM HOSO 
+    WHERE MABACSI = NV.MANV
+);
+-- h.3 Tìm bệnh nhân đã chưa từng được kê bất kỳ loại thuốc nào có lưu trong kho
+SELECT BN.MABN, BN.HOTEN
+FROM BENHNHAN BN
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM HOSO HS
+    JOIN TOATHUOC TT ON HS.MAHS = TT.MAHS
+    WHERE HS.MABN = BN.MABN
+);
+-- h.4 Tìm những bệnh nhân chưa từng điều trị nội trú đã từng lưu trú ở phòng bệnh của bệnh viện.
+SELECT BN.MABN, BN.HOTEN
+FROM BENHNHAN BN
+WHERE BN.MABN IN (
+    SELECT MABN 
+    FROM BENHNHAN
+    
+    EXCEPT
+    
+    SELECT MABN 
+    FROM DIEUTRINOITRU
+);
