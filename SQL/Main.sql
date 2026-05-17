@@ -635,7 +635,7 @@ INSERT INTO TOATHUOC (MATOA, MAHS, MATHUOC, SOLUONG, DONGIA, THANHTIEN, LIEULUON
 ('TOA020', 'HS020', 6, 30, 3000.00, 90000.00, N'1 viên/lần', N'Sáng 1 viên', N'Hạ áp'),
 ('TOA020', 'HS020', 16, 30, 1000.00, 30000.00, N'1 viên/lần', N'Tối 1 viên', N'Chống đông máu');
 GO
--- HÀM
+------------------------------------------------- HÀM ---------------------------------------------------------------------
 -- 1.Hàm tính tuổi của bệnh nhân
 CREATE FUNCTION fn_TinhTuoiBenhNhan (@MaBN VARCHAR(10))
 RETURNS INT
@@ -740,4 +740,144 @@ RETURN (
     JOIN NHANVIEN NV ON LHK.MABACSI = NV.MANV
     WHERE LHK.NGAYHEN = @NgayHen
 );
+GO
+---------------------------------------------- TRIGGER ----------------------------------------------------------------------
+USE QuanLyBenhVien;
+GO
+-- 1 kiểm tra ngày nhập hồ sơ so với ngày sinh
+CREATE TRIGGER trg_KiemTraNgayNhapHS
+ON BENHNHAN
+AFTER INSERT, UPDATE
+AS
+BEGIN
+    -- Kiểm tra nếu có bất kỳ dòng nào có Ngày Nhập Hồ Sơ trước Ngày Sinh
+    IF EXISTS (
+        SELECT 1 
+        FROM inserted 
+        WHERE NGAYNHAPHS < NGAYSINH
+    )
+    BEGIN
+        RAISERROR(N'Lỗi: Ngày nhập hồ sơ không thể trước ngày sinh của bệnh nhân!', 16, 1);
+        ROLLBACK TRANSACTION;
+    END
+END;
+GO
+--2 Khi thêm một loại thuốc mới vào kho, nếu số lượng tồn lớn hơn 0 thì tự động đặt trạng thái thành 'Còn hàng'. Nếu bằng 0 thì tự động đặt là 'Hết hàng'.
+CREATE TRIGGER trg_TuDongCapNhatTrangThaiThuoc
+ON THUOC
+AFTER INSERT, UPDATE
+AS
+BEGIN
+    -- Cập nhật trạng thái 'Còn hàng' nếu số lượng > 0
+    UPDATE THUOC
+    SET TRANGTHAI = N'Còn hàng'
+    FROM THUOC t
+    JOIN inserted i ON t.MATHUOC = i.MATHUOC
+    WHERE i.SOLUONGTON > 0;
+
+    -- Cập nhật trạng thái 'Hết hàng' nếu số lượng = 0
+    UPDATE THUOC
+    SET TRANGTHAI = N'Hết hàng'
+    FROM THUOC t
+    JOIN inserted i ON t.MATHUOC = i.MATHUOC
+    WHERE i.SOLUONGTON = 0;
+END;
+GO 
+-- 3 tự động tính thành tiền cho toa thuốc 
+CREATE TRIGGER trg_TinhThanhTienToaThuoc
+ON TOATHUOC
+AFTER INSERT, UPDATE
+AS
+BEGIN
+    -- Cập nhật cột THANHTIEN dựa trên đơn giá và số lượng kê đơn
+    UPDATE TOATHUOC
+    SET THANHTIEN = t.SOLUONG * t.DONGIA
+    FROM TOATHUOC t
+    JOIN inserted i ON t.ID = i.ID;
+END;
+GO
+-- 4 tự động trừ số lượng tồn của thuốc sau khi kê đơn thuốc
+CREATE TRIGGER trg_TruKhoKhiKeToa
+ON TOATHUOC
+AFTER INSERT
+AS
+BEGIN
+    UPDATE THUOC
+    SET SOLUONGTON = THUOC.SOLUONGTON - i.SOLUONG
+    FROM THUOC
+    JOIN inserted i ON THUOC.MATHUOC = i.MATHUOC;
+END;
+GO
+-- 5 thay vì xóa dữ liệu nhân viên thì cập nhật trạng thái sang nghỉ việc
+CREATE TRIGGER trg_XoaMemNhanVien
+ON NHANVIEN
+INSTEAD OF DELETE
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    UPDATE NHANVIEN
+    SET TRANGTHAI = N'Nghỉ việc'
+    FROM NHANVIEN nv
+    JOIN deleted d ON nv.MANV = d.MANV;
+    
+END;
+GO
+---------------------------------------------- USER --------------------------------------------------------------------------
+-- 1. tạo login cho server
+USE master;
+GO
+CREATE LOGIN LoginADMIN WITH PASSWORD = 'AdminPassword123!';
+CREATE LOGIN LoginBACSI WITH PASSWORD = 'DoctorPassword123!';
+CREATE LOGIN LoginYTA WITH PASSWORD = 'NursePassword123!';
+CREATE LOGIN LoginKETOAN WITH PASSWORD = 'AccountantPassword123!';
+CREATE LOGIN LoginDUOCSI WITH PASSWORD = 'PharmacistPassword123!';
+GO
+
+-- 2. Tạo user trong csdl cho mỗi login
+USE QuanLyBenhVien;
+GO
+
+CREATE USER ADMINBENHVIEN FOR LOGIN LoginADMIN;
+CREATE USER BACSI FOR LOGIN LoginBACSI;
+CREATE USER YTA FOR LOGIN LoginYTA;
+CREATE USER KETOANVIEN FOR LOGIN LoginKETOAN;
+CREATE USER DUOCSI FOR LOGIN LoginDUOCSI;
+GO
+
+-- toàn quyền trên csdl bệnh viện
+ALTER ROLE db_owner ADD MEMBER ADMINBENHVIEN;
+
+-- bác sĩ quyền thêm xóa sửa dữ liệu liên quan đến bệnh nhân và read-only thông tin của bệnh viện
+GRANT SELECT, INSERT, UPDATE ON BENHNHAN TO BACSI;
+GRANT SELECT, INSERT, UPDATE ON HOSO TO BACSI;
+GRANT SELECT, INSERT, UPDATE ON TOATHUOC TO BACSI;
+GRANT SELECT, INSERT, UPDATE ON LICHSUDIEUTRI TO BACSI;
+GRANT SELECT, INSERT, UPDATE ON CHITIETDICHVU TO BACSI;
+GRANT SELECT ON NHANVIEN TO BACSI;
+GRANT SELECT ON KHOA TO BACSI;
+GRANT SELECT ON THUOC TO BACSI;
+GRANT SELECT ON DICHVUYTE TO BACSI;
+GRANT SELECT ON PHONGBENH TO BACSI;
+
+-- quyền y tá thêm xóa sửa thông tin bệnh nhân read-only thông tin bệnh viện
+GRANT SELECT, INSERT, UPDATE ON BENHNHAN TO YTA;
+GRANT SELECT, INSERT, UPDATE ON LICHHENKHAM TO YTA;
+GRANT SELECT, INSERT, UPDATE ON DIEUTRINOITRU TO YTA;
+GRANT SELECT, UPDATE ON PHONGBENH TO YTA;
+GRANT SELECT ON KHOA TO YTA;
+GRANT SELECT ON NHANVIEN TO YTA;
+
+-- kế toán quyền thêm xóa sửa các thông tin liên quan đến hóa đơn, viện phí
+GRANT SELECT, INSERT, UPDATE ON HOADONVIENPHI TO KETOANVIEN;
+GRANT SELECT, INSERT, UPDATE ON CHITIETVIENPHI TO KETOANVIEN;
+GRANT SELECT, INSERT, UPDATE ON THANHTOAN TO KETOANVIEN;
+GRANT SELECT ON BENHNHAN TO KETOANVIEN;
+GRANT SELECT ON CHITIETDICHVU TO KETOANVIEN;
+GRANT SELECT ON TOATHUOC TO KETOANVIEN;
+
+-- dược sĩ quyền thêm xóa sửa thông tin thuốc
+GRANT SELECT, UPDATE ON THUOC TO DUOCSI;
+GRANT SELECT ON TOATHUOC TO DUOCSI;
+GRANT SELECT ON BENHNHAN TO DUOCSI;
 GO
