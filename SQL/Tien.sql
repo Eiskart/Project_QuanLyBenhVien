@@ -198,3 +198,27 @@ WHERE BN.MABN IN (
     SELECT MABN 
     FROM DIEUTRINOITRU
 );
+-- check function
+-- 1. Nguyễn Văn An sinh ngày 1985-05-12. Năm nay 2026 thì kết quả phải ra 41.
+SELECT dbo.fn_TinhTuoiBenhNhan('BN001') AS Tuoi_BN001;
+
+-- 2. HS001 có TOA001 gồm: (20 viên * 3500) + (10 viên * 1500) = 85,000. Kết quả phải ra 85000.00.
+    SELECT dbo.fn_TongTienThuocHoSo('HS001') AS TienThuoc_HS001;
+
+-- 3. Kiểm tra xem dịch vụ MRI mang lại tổng bao nhiêu tiền dựa trên bảng CHITIETDICHVU
+    SELECT dbo.fn_TongDoanhThuDichVu(5) AS DoanhThu_DichVu_5;
+
+-- 4. Hàm này sẽ cộng dồn cột SOGIUONGTRONG của tất cả các phòng thuộc khoa K004
+    SELECT dbo.fn_DemGiuongTrongTheoKhoa('K004') AS GiuongTrong_K004;
+
+-- 5. Danh sách bệnh nhân của bác sĩ NV001
+    SELECT * FROM dbo.fn_DanhSachBenhNhanCuaBacSi('NV001');
+
+-- 6. Thuốc sắp hết hạn trong vòng 24 tháng tới
+    SELECT * FROM dbo.fn_ThuocSapHetHan(24);
+
+-- 7. Lịch sử khám bệnh của bệnh nhân BN004
+    SELECT * FROM dbo.fn_LichSuKhamBenh('BN004');
+
+-- 8. Lịch hẹn khám vào ngày 15/05/2026
+    SELECT * FROM dbo.fn_LichHenTheoNgay('2026-05-15');
